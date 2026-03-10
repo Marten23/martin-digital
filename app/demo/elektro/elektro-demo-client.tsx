@@ -1,8 +1,10 @@
 ﻿"use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   Bolt,
+  CalendarDays,
   CalendarClock,
   CheckCircle2,
   CircleAlert,
@@ -23,17 +25,17 @@ const services = [
   },
   {
     title: "Smarthome & Steuerung",
-    text: "Intelligente Licht-, Rolladen- und Sicherheitssteuerung fuer Ihr Objekt.",
+    text: "Intelligente Licht-, Rolladen- und Sicherheitssteuerung für Ihr Objekt.",
     icon: House,
   },
   {
-    title: "Wartung & Stoerung",
+    title: "Wartung & Störung",
     text: "Schnelle Fehleranalyse und fachgerechte Reparatur bei Ausfall oder Defekt.",
     icon: Wrench,
   },
   {
-    title: "Sicherheitspruefung",
-    text: "Pruefung nach aktuellen Standards, damit Ihre Anlage sicher und belastbar bleibt.",
+    title: "Sicherheitsprüfung",
+    text: "Prüfung nach aktuellen Standards, damit Ihre Anlage sicher und belastbar bleibt.",
     icon: ShieldCheck,
   },
 ];
@@ -42,8 +44,30 @@ const safetyPoints = [
   "Arbeiten nach VDE-Richtlinien",
   "Dokumentierte Sicherheitschecks",
   "Klare, transparente Kostenkommunikation",
-  "Verlaessliche Termine und saubere Ausfuehrung",
+  "Verlässliche Termine und saubere Ausführung",
 ];
+
+const statusCycle = ["frei", "belegt", "wenig", "frei", "wenig", "belegt", "belegt"] as const;
+
+const availability = Array.from({ length: 14 }, (_, index) => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + index);
+  const status = statusCycle[index % statusCycle.length];
+  const day = date.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "");
+  const dateLabel = date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+
+  const window =
+    status === "frei"
+      ? "09:00-11:30"
+      : status === "wenig"
+        ? "14:00-16:00"
+        : index % 6 === 0 || index % 7 === 0
+          ? "Notdienst"
+          : "Ausgebucht";
+
+  return { day, date: `${dateLabel}.`, status, window };
+});
 
 function CableBackground() {
   const { scrollY } = useScroll();
@@ -141,18 +165,18 @@ export function ElektroDemoClient() {
 
       <main className="relative z-10">
         <section className="relative overflow-hidden border-b border-[#232936] bg-gradient-to-b from-[#121926]/95 to-[#0d1118]/95">
-          <div className="pointer-events-none absolute -top-24 -left-10 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(248,180,0,0.16),_transparent_70%)] blur-3xl" />
-          <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-[1fr_1fr] md:items-center md:py-24">
+          <div className="pointer-events-none absolute -top-10 -left-10 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(248,180,0,0.16),_transparent_70%)] blur-3xl" />
+          <div className="mx-auto grid max-w-6xl gap-10 px-6 py-8 md:grid-cols-[1fr_1fr] md:items-center md:py-12">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-[#3b465a] bg-[#171f2d] px-4 py-1 text-sm font-semibold text-[#f8c65b]">
                 <CircleAlert size={14} /> Starkstrom? Nur vom Profi.
               </p>
               <h1 className="mt-6 text-4xl leading-tight text-white md:text-6xl">
-                Elektrik ist kraftvoll, wir sorgen dafuer, dass sie sicher funktioniert.
+                Elektrik ist kraftvoll, wir sorgen dafür, dass sie sicher funktioniert.
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#c3cad5]">
-                Ob Neuinstallation, Stoerung oder Modernisierung, wir sind der Partner fuer lokale
-                Unternehmen, Baustellen und Privathaushalte, die klare Loesungen brauchen.
+                Ob Neuinstallation, Störung oder Modernisierung, wir sind der Partner für lokale
+                Unternehmen, Baustellen und Privathaushalte, die klare Lösungen brauchen.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="#kontakt" className="rounded-full bg-[#f8b400] px-6 py-3 text-sm font-semibold text-[#1a1a1a] transition hover:bg-[#ffcb45]">
@@ -165,18 +189,29 @@ export function ElektroDemoClient() {
             </div>
 
             <div className="rounded-[2rem] border border-[#2c3342] bg-[#141a25] p-5 shadow-[0_24px_50px_-36px_rgba(0,0,0,0.9)]">
-              <div className="h-52 rounded-2xl border border-[#343d4f] bg-gradient-to-br from-[#1d2534] via-[#1a202d] to-[#0f141d] p-5">
-                <div className="flex items-center justify-between text-sm text-[#f8c65b]">
-                  <span className="inline-flex items-center gap-2"><Bolt size={15} /> Einsatzstatus</span>
-                  <span className="rounded-full bg-[#2f3748] px-3 py-1 text-xs text-[#d1d8e3]">24h Rueckruf</span>
+              <div className="relative overflow-hidden rounded-2xl border border-[#343d4f]">
+                <Image
+                  src="/images/Elektiker.png"
+                  alt="Elektriker im Einsatz"
+                  width={1400}
+                  height={900}
+                  priority
+                  className="h-auto w-full object-contain"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0f141d]/85 via-[#111a27]/35 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-5">
+                  <div className="flex items-center justify-between text-sm text-[#f8c65b]">
+                    <span className="inline-flex items-center gap-2"><Bolt size={15} /> Einsatzstatus</span>
+                    <span className="rounded-full bg-[#2f3748] px-3 py-1 text-xs text-[#d1d8e3]">24h Rückruf</span>
+                  </div>
+                  <p className="mt-4 text-2xl font-semibold text-white">Schnelle Hilfe bei Stromproblemen</p>
+                  <p className="mt-3 text-sm text-[#aab3c2]">Unsere Teams sind im Einsatz und koordinieren Termine strukturiert.</p>
                 </div>
-                <p className="mt-4 text-2xl font-semibold text-white">Schnelle Hilfe bei Stromproblemen</p>
-                <p className="mt-3 text-sm text-[#aab3c2]">Unsere Teams sind im Einsatz und koordinieren Termine strukturiert.</p>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className="rounded-xl border border-[#323b4c] bg-[#121824] p-4">
                   <p className="text-xs text-[#8c97a9]">Heute disponiert</p>
-                  <p className="mt-2 text-xl font-semibold text-white">12 Einsaetze</p>
+                  <p className="mt-2 text-xl font-semibold text-white">12 Einsätze</p>
                 </div>
                 <div className="rounded-xl border border-[#323b4c] bg-[#121824] p-4">
                   <p className="text-xs text-[#8c97a9]">Notdienstfenster</p>
@@ -189,7 +224,7 @@ export function ElektroDemoClient() {
 
         <section id="leistungen" className="mx-auto max-w-6xl px-6 py-20">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#f8c65b]">Leistungen</p>
-          <h2 className="mt-3 text-4xl text-white">Starke Loesungen fuer Elektro, Sanierung und Sicherheit</h2>
+          <h2 className="mt-3 text-4xl text-white">Starke Lösungen für Elektro, Sanierung und Sicherheit</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {services.map((service) => {
               const Icon = service.icon;
@@ -213,9 +248,9 @@ export function ElektroDemoClient() {
           <div className="mx-auto grid max-w-6xl gap-8 px-6 md:grid-cols-[0.95fr_1.05fr] md:items-start">
             <div className="rounded-3xl border border-[#2f3747] bg-[#151c29] p-7">
               <p className="text-sm font-semibold uppercase tracking-wide text-[#f8c65b]">Gefahr & Sicherheit</p>
-              <h2 className="mt-3 text-3xl text-white">Elektrizitaet ist kein Spiel, wir arbeiten mit System.</h2>
+              <h2 className="mt-3 text-3xl text-white">Elektrizität ist kein Spiel, wir arbeiten mit System.</h2>
               <p className="mt-4 text-[#b5bfcd]">
-                Wo Strom zur Gefahr werden kann, sorgen wir fuer Sicherheit, klare Prozesse und fachgerechte Ausfuehrung.
+                Wo Strom zur Gefahr werden kann, sorgen wir für Sicherheit, klare Prozesse und fachgerechte Ausführung.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -230,10 +265,10 @@ export function ElektroDemoClient() {
 
         <section id="zeiten" className="mx-auto max-w-6xl px-6 py-20">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#f8c65b]">Erreichbarkeit</p>
-          <h2 className="mt-3 text-4xl text-white">Buerozeiten und Tourenbetrieb</h2>
+          <h2 className="mt-3 text-4xl text-white">Bürozeiten und Einsatzbetrieb</h2>
           <div className="mt-8 grid gap-6 md:grid-cols-[1fr_1fr]">
             <article className="rounded-2xl border border-[#2c3342] bg-[#141b27] p-6">
-              <p className="text-lg font-semibold text-white">Buerozeiten (Ansprechpartner vor Ort)</p>
+              <p className="text-lg font-semibold text-white">Bürozeiten (Ansprechpartner vor Ort)</p>
               <ul className="mt-4 space-y-2 text-sm text-[#c5cedb]">
                 <li className="flex items-center gap-2"><Clock3 size={14} className="text-[#f8c65b]" /> Montag-Freitag: 07:30-17:30 Uhr</li>
                 <li className="flex items-center gap-2"><Phone size={14} className="text-[#f8c65b]" /> Telefon: 030 45678900</li>
@@ -242,13 +277,42 @@ export function ElektroDemoClient() {
             </article>
 
             <article className="rounded-2xl border border-[#2c3342] bg-[#141b27] p-6">
-              <p className="text-lg font-semibold text-white">Wenn niemand im Buero ist</p>
-              <p className="mt-3 text-sm text-[#b7c0cf]">Unsere Teams sind dann in der Regel direkt bei Kunden on Tour.</p>
+              <p className="text-lg font-semibold text-white">Wenn wir gerade nicht im Büro sind</p>
+              <p className="mt-3 text-sm text-[#b7c0cf]">Unsere Teams sind in der Regel direkt im Kundeneinsatz.</p>
               <div className="mt-4 rounded-xl border border-[#313a4c] bg-[#0f1520] p-4">
-                <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#f8c65b]"><Truck size={15} /> Fahrzeugstatus</p>
-                <p className="mt-2 text-sm text-[#d2dae7]">Techniker unterwegs, Rueckruf in der Regel innerhalb von 30-60 Minuten.</p>
+                <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#f8c65b]"><Truck size={15} /> Einsatzstatus</p>
+                <p className="mt-2 text-sm text-[#d2dae7]">Aktuell im Einsatz, Rückruf in der Regel innerhalb von 30 bis 60 Minuten.</p>
               </div>
             </article>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-[#2c3342] bg-[#141b27] p-6">
+            <p className="inline-flex items-center gap-2 text-lg font-semibold text-white">
+              <CalendarDays size={18} className="text-[#f8c65b]" /> Terminlage der nächsten 2 Wochen
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4 md:grid-cols-7">
+              {availability.map((slot) => (
+                <article key={`${slot.day}-${slot.date}`} className="rounded-lg border border-[#323b4c] bg-[#0f1520] p-2">
+                  <p className="text-xs text-[#95a1b5]">{slot.day}</p>
+                  <p className="mt-1 text-xs font-semibold text-white">{slot.date}</p>
+                  <span
+                    className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                      slot.status === "frei"
+                        ? "bg-[#18321f] text-[#97e5af]"
+                        : slot.status === "wenig"
+                          ? "bg-[#392f14] text-[#ffd77a]"
+                          : "bg-[#34202a] text-[#ffb9c4]"
+                    }`}
+                  >
+                    {slot.status === "frei" ? "Frei" : slot.status === "wenig" ? "Wenige Slots" : "Belegt"}
+                  </span>
+                  <p className="mt-1 text-[11px] text-[#b7c1d0]">{slot.window}</p>
+                </article>
+              ))}
+            </div>
+            <p className="mt-4 text-xs text-[#98a3b6]">
+              Demo-Hinweis: In der Live-Version gibt der Elektriker den passenden Termin frei, danach wird die Verfügbarkeit synchronisiert.
+            </p>
           </div>
         </section>
 
@@ -258,7 +322,7 @@ export function ElektroDemoClient() {
               <p className="text-sm font-semibold uppercase tracking-wide text-[#f8c65b]">Kontaktformular</p>
               <h2 className="mt-3 text-4xl text-white">Schildern Sie Ihr Anliegen, wir planen den Termin mit Ihnen.</h2>
               <p className="mt-4 max-w-2xl text-sm text-[#b8c2d1]">
-                Mit Ihrer Erstbeschreibung koennen wir den Einsatz direkt einschaetzen und schneller einen passenden Termin koordinieren.
+                Mit Ihrer Erstbeschreibung und bis zu drei Wunschzeiten können wir den Einsatz direkt einschätzen und schneller einen passenden Termin koordinieren.
               </p>
 
               <form className="mt-8 grid gap-4 md:grid-cols-2">
@@ -278,16 +342,30 @@ export function ElektroDemoClient() {
                   Schilderung des Problems
                   <textarea name="details" rows={5} required className="rounded-xl border border-[#374055] bg-[#0f1520] px-4 py-3 text-[#edf1f7] outline-none focus:border-[#f8c65b]" placeholder="Was ist passiert? Seit wann? Gibt es Gefahr oder kompletten Ausfall?" />
                 </label>
+                <label className="grid gap-2 text-sm font-medium text-[#d5dce7]">
+                  Wunschtermin 1
+                  <input type="datetime-local" name="desiredSlot1" className="rounded-xl border border-[#374055] bg-[#0f1520] px-4 py-3 text-[#edf1f7] outline-none focus:border-[#f8c65b]" />
+                </label>
+                <label className="grid gap-2 text-sm font-medium text-[#d5dce7]">
+                  Wunschtermin 2
+                  <input type="datetime-local" name="desiredSlot2" className="rounded-xl border border-[#374055] bg-[#0f1520] px-4 py-3 text-[#edf1f7] outline-none focus:border-[#f8c65b]" />
+                </label>
                 <label className="grid gap-2 text-sm font-medium text-[#d5dce7] md:col-span-2">
-                  Wunschzeit fuer Rueckruf / Termin
-                  <input type="text" name="time" className="rounded-xl border border-[#374055] bg-[#0f1520] px-4 py-3 text-[#edf1f7] outline-none focus:border-[#f8c65b]" placeholder="z. B. heute ab 15:00 Uhr" />
+                  Wunschtermin 3 (optional)
+                  <input type="datetime-local" name="desiredSlot3" className="rounded-xl border border-[#374055] bg-[#0f1520] px-4 py-3 text-[#edf1f7] outline-none focus:border-[#f8c65b]" />
+                </label>
+                <label className="md:col-span-2 flex items-start gap-3 rounded-xl border border-[#313b50] bg-[#101722] p-4 text-sm text-[#cad3e0]">
+                  <input type="checkbox" required className="mt-0.5 h-4 w-4 rounded border-[#4a566d] bg-[#0f1520] accent-[#f8c65b]" />
+                  <span>
+                    Ich stimme zu, dass meine Angaben zur Terminabstimmung verarbeitet werden. Es werden nur Verfügbarkeiten und keine Kundendaten im Kalender angezeigt.
+                  </span>
                 </label>
 
                 <button
                   type="submit"
                   className="md:col-span-2 mt-2 rounded-full bg-[#f8b400] px-6 py-3 text-sm font-semibold text-[#1a1a1a] transition hover:bg-[#ffcb45]"
                 >
-                  Anfrage absenden und Rueckruf erhalten
+                  Anfrage absenden und Terminvorschläge anfragen
                 </button>
               </form>
             </div>
